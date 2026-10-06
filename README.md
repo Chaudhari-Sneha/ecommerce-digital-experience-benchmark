@@ -3,13 +3,13 @@
 How hard is it to shop on India's biggest e-commerce sites, and who is getting
 better or worse?
 
-This project answers that with an automated pipeline. Twice a day it collects
-public digital-experience data for 10 Indian e-commerce companies, turns it
-into a single explainable **Digital Friction Score**, flags unusual changes and
-ranks where management should look first. A Power BI dashboard sits on top.
+This project answers that with an automated pipeline. Every 12 hours it
+collects public digital-experience data for 10 Indian e-commerce companies,
+turns it into a single explainable **Digital Friction Score**, flags unusual
+changes and ranks where to look first. A Power BI dashboard sits on top.
 
-Everything runs on free tools: Python, a local PostgreSQL database and Power BI
-Desktop. There are no paid APIs, no cloud services and no Power BI licence.
+Everything runs on free tools: Python, a local PostgreSQL database, Power BI
+Desktop and Windows Task Scheduler.
 
 ## How it works
 
@@ -23,52 +23,61 @@ Each run:
 
 1. **Collects** three kinds of data for every company:
    - a Google Lighthouse test (mobile and desktop) plus real-user Chrome UX
-     Report data, both through the PageSpeed Insights API
+     Report data, both from the PageSpeed Insights API
    - a direct homepage availability and response-time check
-   - a scan of up to 40 links on the homepage for broken ones
-2. **Stores** the raw results in PostgreSQL, along with a JSON copy in
-   `data/raw/<date>/` as an audit trail.
-3. **Scores** each company for the day (India time) and checks the new score
-   against that company's own history for anomalies.
-4. **Logs** the outcome of every source for every company, so the dashboard can
-   show how complete and fresh the data is.
+   - a check of up to 40 same-site links on the homepage for broken ones
+2. **Stores** the results in PostgreSQL, with a JSON copy of each company's raw
+   data in `data/raw/<date>/` as an audit trail.
+3. **Scores** each company for the day (India time) and compares the new score
+   with that company's own history to detect anomalies.
+4. **Records** the outcome of every source for every company, so the dashboard
+   can show how complete and fresh the data is.
 
 All the analysis lives in SQL views, and Power BI reads those views directly.
 
 ## Companies tracked
 
 Flipkart, Myntra, FirstCry, Nykaa, Meesho, Purplle, Tata CLiQ, Amazon India,
-Reliance Digital and Croma. The list lives in `config/companies.yaml`. If you
-remove a company it is marked inactive, and its history is kept.
+Reliance Digital and Croma.
 
-Snapdeal, BigBasket and Ajio were in the original list but were replaced
-because no comparable data could be collected for them. Snapdeal and BigBasket
-block Google's Lighthouse crawler, and Lighthouse would have scored their error
-pages as a perfect 100. Ajio timed out in every Lighthouse run.
+The list lives in `config/companies.yaml`. A company removed from it is marked
+inactive and its history is kept.
 
 ## The dashboard
 
 The Power BI report has two pages.
 
+### Executive Dashboard
+
 ![Executive Dashboard](images/executive-dashboard.png)
 
-**Executive Dashboard**: one page for decision-makers. A row of headline KPIs
-sits above three sections.
+- **Headline KPIs**: industry average friction, how many companies are above
+  it, the top priority company and its main problem area, data confidence,
+  and the best and worst performer.
+- **Priority Matrix**: each company's friction relative to the industry
+  average against its change from its own 7-day average, coloured by priority
+  zone.
+- **Load Time Split**: real-user load time divided into server wait and page
+  build, showing whether slowness is a server problem or a page problem.
+- **Friction Score Composition**: what each company's score is made of.
+- **Areas Trailing the Industry Average**: the components where each company
+  is worse than the industry.
+- **Real-User Experience**: Google's Core Web Vitals from real Chrome users,
+  with Google's rating and the share of poor visits.
+- **Mobile vs Desktop Performance**: Lighthouse performance score by device.
+- **Anomaly Alerts**, **Component Trend Status** (sustained vs one-off
+  changes), **Top Performance Issues** (Lighthouse's recurring findings) and
+  **Friction Trend**. The company slicer filters these four visuals only.
 
-| Section | What it answers |
-|---|---|
-| Headline KPIs | Industry average friction, how many companies are worse than average, the top priority, the best and worst performer, and how much to trust today's data |
-| Priority & Attention | Who needs attention first (priority matrix: market position vs recent trend), what each company's score is made of, and where each one trails the industry |
-| Competitive Position | Real-user experience on Google's Core Web Vitals, mobile vs desktop performance, and whether slow loading is a server problem or a page problem |
-| Drivers & Trends | Friction over time vs the industry, which components are getting worse (sustained vs one-off), the specific Lighthouse findings slowing each site, and anomaly alerts. A company slicer filters this section only |
-
-**Data Quality & Methodology**: data freshness, last-run success, run history,
-collection status per company and source, daily data completeness, and a short
-explanation of how the scores are calculated.
+### Data Quality & Methodology
 
 ![Data Quality & Methodology](images/data-quality.png)
 
-Opening and refreshing the dashboard is covered in
+Data freshness, last-run coverage, run completion over 7 days, days with data,
+collection status per company and source, run history, daily data
+completeness, and a summary of how every number is calculated.
+
+Opening and refreshing the report is covered in
 [powerbi/SETUP_GUIDE.md](powerbi/SETUP_GUIDE.md).
 
 ## Digital Friction Score
@@ -80,23 +89,23 @@ friction scale:
 | Component | Weight | Based on |
 |---|---|---|
 | Performance | 25% | Lighthouse performance score (60% mobile, 40% desktop) |
-| Core Web Vitals | 20% | LCP, CLS and a lab responsiveness measure, against Google's good/poor thresholds |
+| Core Web Vitals | 20% | LCP, CLS and a lab responsiveness measure, scored against Google's good/poor thresholds |
 | Site Quality | 15% | Lighthouse accessibility, best-practices and SEO scores |
-| Reliability | 25% | Uptime and server response time |
-| Broken Links | 15% | Share of homepage links that are broken |
+| Reliability | 25% | Uptime plus a penalty for slow server responses |
+| Broken Links | 15% | Share of checked homepage links that are broken |
 
 Because it is a plain weighted sum, every score splits exactly into
-per-component contributions, which is how the dashboard explains any change.
-If a component can't be measured for a company, it is left out and the other
-weights are scaled up, so a site is never rewarded for being unmeasurable. A
-score counts as reliable only when at least 60% of the expected data arrived.
-The full formula is in `collectors/scoring.py`.
+per-component contributions. If a component can't be measured for a company,
+it is left out and the other weights are scaled up, so a site is never
+rewarded for being unmeasurable. A score counts as reliable only when at least
+3 of the 5 components were measured (60% data completeness). The formula is in
+`collectors/scoring.py`.
 
 ## Management Priority Score
 
-A 0-100 score that ranks **where to look first**. It is a prioritisation aid,
-not a business case: it does not estimate revenue, conversion or customer
-loss, and it makes no causal claims.
+A 0-100 score that ranks **where to look first**. It is a prioritisation aid:
+it does not estimate revenue, conversion or customer loss, and it makes no
+causal claims.
 
 ```
 Priority = Confidence × (0.35 × Severity + 0.25 × Gap + 0.25 × Deterioration + 0.15 × Persistence)
@@ -107,37 +116,38 @@ Priority = Confidence × (0.35 × Severity + 0.25 × Gap + 0.25 × Deterioration
 | Severity | The company's latest reliable friction score |
 | Gap | How far it is above the industry average (20+ points above = 100) |
 | Deterioration | How much worse it is than its own 7-day average (10+ points worse = 100) |
-| Persistence | Share of the last 14 days it spent above the industry average |
+| Persistence | Share of its readings in the last 14 days that were above the industry average |
 | Confidence | 0.5 + 0.5 × data completeness × min(1, readings in last 21 days ÷ 7) |
 
-Deterioration compares against a 7-day average, not the previous reading,
-because single Lighthouse runs are noisy. A site can move 15-20 points between
-two runs with nothing actually changing.
+Deterioration compares against a 7-day average rather than the previous
+reading, because single Lighthouse runs are noisy.
 
-Scores of 45 and above are **High** priority and 25-45 are **Medium**. The
-priority matrix also places every company in one of four zones (**Critical**,
-**Lagging**, **At Risk** or **Healthy**), based on whether it is worse than
-the industry average and whether it is getting worse. Each company also gets a
-main issue, a suggested area to investigate and a data-confidence label. The
-recommendations are phrased as "review" or "investigate" because the data shows
-where to look, not what caused the problem. The logic is in
-`sql/views_management.sql`.
+Scores of 45 and above are High priority, 25 to 45 Medium. The priority
+matrix places each company in one of four zones:
+
+| Zone | Rule |
+|---|---|
+| Critical | Worse than the industry average and at least 1 point worse than its own 7-day average |
+| Lagging | Worse than the industry average, not getting worse |
+| At Risk | Better than the industry average but getting worse |
+| Healthy | Neither |
+
+The logic is in `sql/views_management.sql`.
 
 ## Anomaly detection
 
 Each new score is compared with the median of that company's reliable scores
-from the previous 21 days, using a robust z-score (median and MAD, which are
-not thrown off by a single bad run). A change is flagged only when it is at
-least 3.5 robust z-scores **and** at least 2 points away from the median, so a
-near-constant metric can't turn a tiny blip into an alert.
+from the previous 21 days, using a robust z-score (median and MAD, which a
+single bad run can't distort). A change is flagged only when it is at least
+3.5 robust z-scores **and** at least 2 points away from the median.
 
-A company needs 7 reliable days of history before it is monitored. Until then
-the dashboard says it is still building a baseline instead of guessing.
+A company is monitored once it has 7 reliable days of history. Until then the
+dashboard shows how many companies are still building a baseline.
 
 ## Getting started
 
-You need Python 3.12+, PostgreSQL and Power BI Desktop, all free. The scheduler
-script is for Windows.
+You need Python 3 (developed on 3.14), PostgreSQL and Power BI Desktop. The
+scheduler script is for Windows.
 
 1. **Install the Python packages**
    ```
@@ -150,30 +160,29 @@ script is for Windows.
    billing account is needed.
 
 3. **Add your settings.** Copy `.env.example` to `.env` and fill in your
-   PostgreSQL password and the API key. `.env` is git-ignored, so it stays on
-   your machine.
+   PostgreSQL password and the API key. `.env` is git-ignored.
 
 4. **Create the database, tables and views**
    ```
    python scripts/setup_db.py
    ```
-   This is safe to re-run.
 
 5. **Run the pipeline once**
    ```
    python -m collectors.orchestrator
    ```
-   This syncs the company list from `config/companies.yaml`, then collects and
-   scores. A run takes several minutes because requests are spaced out
-   politely. Progress goes to `logs/pipeline.log`.
+   This loads the company list from `config/companies.yaml`, then collects and
+   scores. A full run takes about 20 to 50 minutes, because Lighthouse tests
+   are slow and requests are spaced out politely. Progress is written to
+   `logs/pipeline.log`.
 
-6. **Schedule it** (optional, for continuous collection). In PowerShell:
+6. **Schedule it** (optional). In PowerShell:
    ```
    .\scripts\register_task_scheduler.ps1
    ```
    This registers a Windows scheduled task that runs the pipeline every
-   12 hours and catches up if the PC was asleep. Use `-IntervalHours` to change
-   the interval.
+   12 hours, and runs it as soon as possible if the PC was off at the
+   scheduled time. Use `-IntervalHours` to change the interval.
 
 7. **Open the dashboard** and click **Refresh**. See
    [powerbi/SETUP_GUIDE.md](powerbi/SETUP_GUIDE.md).
@@ -185,10 +194,15 @@ python -m unittest discover -s tests -v
 ```
 
 The tests recompute the key numbers independently in Python and check that the
-SQL views agree. They cover the friction-score breakdown, the priority score
-and its tiers and zones, component trend status, real-user metrics, the load
-time split, anomaly readiness and the anomaly rules. They read from the local
-database and don't change anything.
+SQL views agree:
+- the friction-score breakdown, the priority score, tiers and zones
+- component gaps and trend status
+- real-user metrics, the load time split, the mobile/desktop comparison and
+  the Lighthouse findings
+
+They also unit-test the anomaly rules and check that anomaly readiness matches
+the detection window. The tests read from the local database
+and don't change anything.
 
 ## Project structure
 
@@ -196,36 +210,36 @@ database and don't change anything.
 collectors/          Data collection, scoring and anomaly detection (Python)
   orchestrator.py    Entry point for one pipeline run
 config/              Companies to track
-sql/                 Database schema and the analytical views
+sql/                 Database schema and analytical views
 scripts/             Database setup and Task Scheduler registration
-tests/               Checks of the SQL views against independent Python calculations
+tests/               Checks of the SQL views against independent calculations
 powerbi/             Power BI project (report and data model, saved as text)
-data/raw/            Raw JSON from each run (not committed)
+images/              Dashboard screenshots
 ```
 
 ## Limitations
 
-- **Bot protection is treated as "blocked", not "down".** Several sites reject
-  automated requests. The pipeline records this honestly and doesn't try to
-  get around it. For those sites, reliability is based on whether Google's
-  Lighthouse could load the page and how fast the server responded.
-- **The link check only sees links in the page HTML.** Amazon India and
-  Tata CLiQ build their homepage links with JavaScript, so their Broken Links
-  component is marked as unsupported rather than scored.
-- **The responsiveness measure is a lab proxy.** Lighthouse can't measure real
-  Interaction to Next Paint (INP). The real INP figure comes from Chrome UX
-  Report data and appears separately on the dashboard.
+- **Some sites block automated requests.** This is recorded as "blocked", not
+  "down", and the pipeline doesn't try to get around it. For those sites,
+  reliability comes from Google's Lighthouse test instead (whether it could
+  load the page, and the server response time). The broken-link component
+  can't be measured for them.
+- **The link check reads the page HTML only.** Sites that build their homepage
+  links with JavaScript (currently Tata CLiQ) are marked "unsupported" for
+  broken links.
+- **The responsiveness measure in the score is a lab proxy.** Lighthouse can't
+  measure real Interaction to Next Paint (INP). The real-user INP figure comes
+  from Chrome UX Report data and is shown separately.
 - **The server vs page load split is approximate.** It subtracts one 75th
   percentile from another, and percentiles don't add up exactly.
-- **History is still short.** Baselines, persistence and confidence get more
-  stable as more days are collected.
-- **Rankings are relative.** A High priority company is the first place to look,
-  not proof of a business problem.
+- **Baselines need history.** Anomaly detection, 7-day comparisons and
+  confidence all improve as more days are collected.
+- **Rankings are relative.** A High priority company is the first place to
+  look, not proof of a business problem.
 - **Refresh is manual.** Power BI Desktop pulls new data when you click
-  Refresh. Automatic cloud refresh would need Power BI Service and a gateway,
-  which this project deliberately avoids.
+  Refresh.
 
 ## License
 
 Released under the [MIT License](LICENSE). The data comes from public sources:
-Google's PageSpeed Insights API and the companies' own public homepages.
+Google's PageSpeed Insights API and the companies' public homepages.

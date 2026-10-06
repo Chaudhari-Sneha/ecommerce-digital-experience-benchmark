@@ -22,19 +22,18 @@ pipeline has collected.
 
 ## Pages
 
-- **Executive Dashboard**: headline KPIs, then three sections:
-  - Priority & Attention
-  - Competitive Position
-  - Drivers & Trends
-
-  The company slicer only filters the Drivers & Trends section, so the
-  industry comparisons above it always show every company.
+- **Executive Dashboard**: headline KPIs, industry comparisons, real-user
+  experience, trends and anomalies. The company slicer only filters the
+  bottom four visuals: Anomaly Alerts, Component Trend Status, Top Performance
+  Issues and Friction Trend. The industry comparisons above them always show
+  every company.
 - **Data Quality & Methodology**: data freshness, run history, collection
   status per source, data completeness and how the scores are calculated.
 
 Some visuals need history before they fill in. Anomaly monitoring starts once a
-company has 7 reliable days of data, and the sustained-vs-one-off trend status
-needs about a week. Until then they show a short message explaining why.
+company has 7 reliable days of data; until then Anomaly Alerts explains how
+many companies are still building a baseline. Component Trend Status shows
+"Insufficient history" until a company has earlier readings to compare with.
 
 Scores built from too little data (under 60% completeness) are left out of
 rankings and averages. Companies removed from the tracked list are hidden.

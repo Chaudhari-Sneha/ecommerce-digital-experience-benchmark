@@ -5,8 +5,7 @@
 
 # Pipeline output (regenerated on every run)
 logs/
-data/raw/*
-!data/raw/.gitkeep
+data/
 
 # Python
 __pycache__/
