@@ -1,0 +1,33 @@
+table companies
+	lineageTag: 23cb19e1-23c1-45ee-a0d7-adc12d07a45b
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a0410620-fa87-4871-abfe-a6d6e7f86b43
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: a7fd01db-2cbb-49d4-9892-5ba5ae536380
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column is_active
+		dataType: boolean
+		lineageTag: 54725c23-623d-45ef-a184-3d0c9c0300da
+		summarizeBy: none
+		sourceColumn: is_active
+
+	partition companies = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="companies"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "is_active"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"is_active", type logical}})
+				in
+				    Typed
+

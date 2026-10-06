@@ -1,0 +1,254 @@
+table _Measures
+	lineageTag: 3517b84e-a351-4832-a5c8-80b2a942b39e
+
+	measure 'Industry avg friction' = CALCULATE(AVERAGE(v_latest_friction_score[friction_score]), REMOVEFILTERS(companies), v_latest_friction_score[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: KPIs
+		lineageTag: 7c11eeae-c2dc-4a3c-aef0-539f32d2d508
+
+	measure 'Last data collected' = CALCULATE(MAX(v_recent_runs[run_finished_at]), v_recent_runs[status] IN {"success", "partial"})
+		formatString: dd mmm, hh:mm
+		displayFolder: KPIs
+		lineageTag: 81fecfe3-9b84-4e6d-843b-1bc45a9137e9
+
+	measure 'Data age (hours)' =
+			VAR t = [Last data collected]
+			RETURN IF(ISBLANK(t), BLANK(), DATEDIFF(t, NOW(), MINUTE) / 60)
+		formatString: 0.0
+		displayFolder: KPIs
+		lineageTag: 2b0f7d97-7f04-4512-a40f-e7907682a155
+
+	measure 'Benchmark date' = CALCULATE(MAX(v_competitor_benchmark[score_date]), ALLSELECTED(companies), ALLSELECTED(v_competitor_benchmark))
+		formatString: dd mmm yyyy
+		displayFolder: Benchmark
+		lineageTag: d9ff4924-a27f-4fd0-9bdd-13187d3bc536
+
+	measure 'Friction at date' =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[friction_score]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: ea798140-899e-400e-a04f-d057198ca013
+
+	measure Performance =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[perf_contribution]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: c0a4034e-396b-4fba-bea9-06071b45beb3
+
+	measure 'Core Web Vitals' =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[cwv_contribution]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: 7edc12fd-c476-445b-b8bf-3ce7eabae1d3
+
+	measure 'Site Quality' =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[quality_contribution]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: 7902bd01-6101-400c-8896-3a280be773f3
+
+	measure Reliability =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[reliability_contribution]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: 4a8d317a-dddd-439c-b26b-e6b0a4158708
+
+	measure 'Broken Links' =
+			VAR d = [Benchmark date]
+			RETURN CALCULATE(AVERAGE(v_competitor_benchmark[errors_contribution]), v_competitor_benchmark[score_date] = d, v_competitor_benchmark[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Benchmark
+		lineageTag: 3d32c07f-f239-4400-8dfc-5c42266de158
+
+	measure 'Selected companies' = CALCULATE(AVERAGE(v_friction_trend[friction_score]), v_friction_trend[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Trends
+		lineageTag: 273ce47a-2f7f-4193-a917-20c420e20b0f
+
+	measure 'Industry average' = CALCULATE(AVERAGE(v_friction_trend[friction_score]), REMOVEFILTERS(companies), v_friction_trend[is_score_reliable] = TRUE())
+		formatString: 0.0
+		displayFolder: Trends
+		lineageTag: 0de6d832-07c5-483c-bace-ade6b03ec525
+
+	measure 'Companies monitored for anomalies' = COALESCE(CALCULATE(COUNTROWS(v_anomaly_readiness), v_anomaly_readiness[monitored] = TRUE()), 0)
+		formatString: 0
+		displayFolder: Trends
+		lineageTag: cf2cdf8b-9ac2-4a71-b4e4-1dcf33538a48
+
+	measure 'Anomaly status message' =
+			VAR total = COUNTROWS(v_anomaly_readiness)
+			VAR monitored = [Companies monitored for anomalies]
+			VAR flagged = COALESCE(CALCULATE(COUNTROWS(anomalies), anomalies[status] = "new"), 0)
+			RETURN SWITCH(TRUE(),
+			    flagged > 0, BLANK(),
+			    monitored = 0 && HASONEVALUE(companies[company_name]),
+			        "Insufficient history for anomaly detection: " & SELECTEDVALUE(companies[company_name]) & " has "
+			            & FORMAT(MAX(v_anomaly_readiness[baseline_days]), "0") & " of the 7 reliable scored days needed in the last 21.",
+			    monitored = 0, "Insufficient history for anomaly detection: no company has 7 reliable scored days in the last 21 yet.",
+			    monitored < total, "No anomalies detected for the " & FORMAT(monitored, "0") & " monitored compan"
+			        & IF(monitored = 1, "y", "ies") & ". Insufficient history for anomaly detection for the other "
+			        & FORMAT(total - monitored, "0") & " (each needs 7 reliable scored days in the last 21).",
+			    "No anomalies detected: all monitored companies are within their normal range.")
+		displayFolder: Trends
+		lineageTag: 598fcd95-a0de-4d4f-b9ed-70b9092e67e3
+
+	measure 'Industry average (when filtered)' = IF(ISFILTERED(companies[company_name]), [Industry average])
+		formatString: 0.0
+		displayFolder: Trends
+		lineageTag: 31f18ec4-c436-49fd-9aac-e1e67cb28c52
+
+	measure 'Companies benchmarked' = COALESCE(COUNTROWS(v_management_priority), 0)
+		formatString: 0
+		displayFolder: Management
+		lineageTag: 61e5438f-b27a-4ae1-8f01-17a6cb75aa17
+
+	measure 'Industry avg as of' = "as of " & FORMAT(MAX(v_management_priority[latest_date]), "dd mmm")
+		displayFolder: Management
+		lineageTag: 2ae9925f-afeb-4256-b2b7-eee9f4b75a5e
+
+	measure 'Companies above industry avg' = COALESCE(CALCULATE(COUNTROWS(v_management_priority), v_management_priority[gap_vs_industry] > 0), 0)
+		formatString: 0
+		displayFolder: Management
+		lineageTag: 42eab7c1-d766-44aa-8484-d109dd867b9b
+
+	measure 'Benchmarked detail' = "of " & FORMAT([Companies benchmarked], "0") & " benchmarked"
+		displayFolder: Management
+		lineageTag: 82e98bda-ad5d-4eea-8a50-0b4fafba849b
+
+	measure 'Worst friction score' = MAX(v_management_priority[friction_score])
+		formatString: 0.0
+		displayFolder: Management
+		lineageTag: 1bfe808a-b67e-4b7a-8f3e-bc88005d6ec4
+
+	measure 'Worst performer' =
+			VAR t = TOPN(1, v_management_priority, v_management_priority[friction_score], DESC)
+			RETURN MAXX(t, v_management_priority[company_name])
+		displayFolder: Management
+		lineageTag: b9658bf8-6e70-4fad-a34b-f623bb6072f9
+
+	measure 'Top priority score' = MAX(v_management_priority[priority_score])
+		formatString: 0
+		displayFolder: Management
+		lineageTag: afc1d8d0-88ef-4624-8ff1-984435ed2803
+
+	measure 'Top priority issue' =
+			VAR t = TOPN(1, v_management_priority, v_management_priority[priority_score], DESC)
+			RETURN MAXX(t, v_management_priority[company_name]) & " · " & MAXX(t, v_management_priority[driver_component])
+		displayFolder: Management
+		lineageTag: 425e2628-863e-4339-a837-fc5fdecb996e
+
+	measure 'Data coverage' = DIVIDE(AVERAGE(v_management_priority[data_completeness_pct]), 100)
+		formatString: 0%
+		displayFolder: Management
+		lineageTag: 51f91aa0-edf8-4ee9-8043-d1688136716b
+
+	measure 'Coverage detail' = FORMAT([Companies benchmarked], "0") & " of " & FORMAT(COUNTROWS(companies), "0") & " companies scored"
+		displayFolder: Management
+		lineageTag: b959a2c9-efd9-4433-9b7c-95a6eb29634e
+
+	measure 'Last run success rate' =
+			VAR lastId = CALCULATE(MAX(v_recent_runs[run_id]), v_recent_runs[status] IN {"success", "partial"})
+			RETURN DIVIDE(CALCULATE(MAX(v_recent_runs[companies_succeeded]), v_recent_runs[run_id] = lastId),
+			    CALCULATE(MAX(v_recent_runs[companies_attempted]), v_recent_runs[run_id] = lastId))
+		formatString: 0%
+		displayFolder: Pipeline
+		lineageTag: 4e2195e4-8ce6-414d-805e-d9a4605ba3e3
+
+	measure 'Runs completed (7 days)' = COALESCE(CALCULATE(COUNTROWS(v_recent_runs), v_recent_runs[status] IN {"success", "partial"}, v_recent_runs[run_started_at] >= NOW() - 7), 0)
+		formatString: 0
+		displayFolder: Pipeline
+		lineageTag: 2c8a743a-6927-4fd5-9805-42d960d497c1
+
+	measure 'Best friction score' = MIN(v_management_priority[friction_score])
+		formatString: 0.0
+		displayFolder: Compare
+		lineageTag: abe29455-40b2-412c-a2b5-4d33dcd09591
+
+	measure 'Best performer' =
+			VAR t = TOPN(1, v_management_priority, v_management_priority[friction_score], ASC)
+			RETURN MAXX(t, v_management_priority[company_name])
+		displayFolder: Compare
+		lineageTag: 993d1e1f-5b14-47a6-be10-f787ed160b19
+
+	measure 'Real-user result' =
+			VAR v = MAX(v_real_user_checks[p75_display])
+			VAR s = MAX(v_real_user_checks[status])
+			RETURN IF(ISBLANK(v), BLANK(), v & "  ·  " & s)
+		displayFolder: Compare
+		lineageTag: 07e6414f-4efc-4126-aaa4-b94807936403
+
+	measure 'Poor visits %' = DIVIDE(MAX(v_real_user_checks[poor_visits_pct]), 100)
+		formatString: 0%
+		displayFolder: Compare
+		lineageTag: 91809b6a-5ba9-419a-a09e-49cee8078b2c
+
+	measure 'Last collected detail' = "last run finished " & FORMAT([Last data collected], "dd mmm, hh:mm")
+		displayFolder: Pipeline
+		lineageTag: a83fafca-c7aa-425c-803a-726a8468b50e
+
+	measure 'Last run companies detail' =
+			VAR lastId = CALCULATE(MAX(v_recent_runs[run_id]), v_recent_runs[status] IN {"success", "partial"})
+			RETURN FORMAT(CALCULATE(MAX(v_recent_runs[companies_succeeded]), v_recent_runs[run_id] = lastId), "0") & " of "
+			    & FORMAT(CALCULATE(MAX(v_recent_runs[companies_attempted]), v_recent_runs[run_id] = lastId), "0") & " companies collected"
+		displayFolder: Pipeline
+		lineageTag: 9f313298-6552-41d1-9772-ff18cbca170d
+
+	measure 'Runs started (7 days)' = COALESCE(CALCULATE(COUNTROWS(v_recent_runs), v_recent_runs[run_started_at] >= NOW() - 7), 0)
+		formatString: 0
+		displayFolder: Pipeline
+		lineageTag: 60650880-594b-4727-8233-3a7bf0423cbc
+
+	measure 'Run completion rate (7 days)' = DIVIDE([Runs completed (7 days)], [Runs started (7 days)])
+		formatString: 0%
+		displayFolder: Pipeline
+		lineageTag: 1769b0fb-aae8-42ef-9bc6-6af68243a01c
+
+	measure 'Run completion detail' = FORMAT([Runs completed (7 days)], "0") & " of " & FORMAT([Runs started (7 days)], "0") & " scheduled runs finished"
+		displayFolder: Pipeline
+		lineageTag: eb2a7da3-7a49-4e1a-afaa-e9f2a2742a75
+
+	measure 'Days with data (14 days)' = COALESCE(CALCULATE(DISTINCTCOUNT(v_friction_trend[score_date]), v_friction_trend[score_date] > TODAY() - 14, REMOVEFILTERS(companies)), 0)
+		formatString: 0
+		displayFolder: Pipeline
+		lineageTag: 9f0cab0f-415d-4f7a-8b36-58da2eb2961e
+
+	measure 'Days with data detail' = "out of the last 14 days"
+		displayFolder: Pipeline
+		lineageTag: 5ee38ba9-5f95-4a3c-b6a4-526a23f2a558
+
+	measure 'Desktop minus mobile (pts)' = SUM(v_device_gap[mobile_gap])
+		formatString: +0;-0;0
+		displayFolder: Compare
+		lineageTag: 9a7718cd-7632-4d25-9217-bd526bc4d919
+
+	measure 'Selected company name' =
+			IF(ISFILTERED(companies[company_name]),
+			    IF(HASONEVALUE(companies[company_name]), VALUES(companies[company_name]), "Multiple companies"),
+			    "All companies")
+		displayFolder: Trends
+		lineageTag: b85f670e-d6ea-4e9c-ba20-219bc7ebb586
+
+	measure 'Trend title' = "Friction Trend: " & [Selected company name] & " vs Industry"
+		displayFolder: Trends
+		lineageTag: 1cf4259c-bae0-41fc-aa85-fe0867352c6c
+
+	column Dummy
+		dataType: string
+		isHidden
+		lineageTag: 4f1d0f8c-88c8-44b0-b43a-9174ec34ca69
+		summarizeBy: none
+		sourceColumn: Dummy
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Dummy = text], {})
+				in
+				    Source
+

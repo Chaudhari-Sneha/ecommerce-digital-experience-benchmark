@@ -1,0 +1,51 @@
+table v_last_run_status
+	lineageTag: 01f13b88-2d6d-4cd4-a0cb-b525dfd59c00
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 8aa72353-dd08-4c82-a34b-5e98a317fa99
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: 00d73d53-4c0e-4d32-a515-5b17dd350be4
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column pagespeed_status
+		dataType: string
+		lineageTag: a483c0a0-9f4a-448c-8b98-539f9f204c13
+		summarizeBy: none
+		sourceColumn: pagespeed_status
+
+	column uptime_status
+		dataType: string
+		lineageTag: 2c683ade-329d-4dfa-b301-c691c319decb
+		summarizeBy: none
+		sourceColumn: uptime_status
+
+	column linkcheck_status
+		dataType: string
+		lineageTag: 061da541-af3f-4305-9ef3-976957afd693
+		summarizeBy: none
+		sourceColumn: linkcheck_status
+
+	column error_message
+		dataType: string
+		lineageTag: a81accfa-0394-4574-ab3c-a042f89e12bc
+		summarizeBy: none
+		sourceColumn: error_message
+
+	partition v_last_run_status = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_last_run_status"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "pagespeed_status", "uptime_status", "linkcheck_status", "error_message"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"pagespeed_status", type text}, {"uptime_status", type text}, {"linkcheck_status", type text}, {"error_message", type text}})
+				in
+				    Typed
+

@@ -1,0 +1,90 @@
+{
+  "name": "DigitalFriction.json",
+  "dataColors": [
+    "#2a78d6",
+    "#eb6834",
+    "#1baf7a",
+    "#eda100",
+    "#e87ba4",
+    "#008300",
+    "#4a3aa7",
+    "#e34948"
+  ],
+  "foreground": "#0b0b0b",
+  "foregroundNeutralSecondary": "#52514e",
+  "foregroundNeutralTertiary": "#898781",
+  "background": "#ffffff",
+  "backgroundLight": "#f3f2ef",
+  "backgroundNeutral": "#e1e0d9",
+  "tableAccent": "#2a78d6",
+  "good": "#0ca30c",
+  "neutral": "#fab219",
+  "bad": "#d03b3b",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 11,
+      "color": "#0b0b0b"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 11,
+      "color": "#0b0b0b"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 9,
+      "color": "#52514e"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 22,
+      "color": "#0b0b0b"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "border": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#e1e0d9"
+              }
+            },
+            "radius": 8
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "padding": [
+          {
+            "top": 8,
+            "bottom": 8,
+            "left": 12,
+            "right": 12
+          }
+        ],
+        "categoryAxis": [
+          {
+            "showAxisTitle": false
+          }
+        ],
+        "valueAxis": [
+          {
+            "showAxisTitle": false,
+            "gridlineColor": {
+              "solid": {
+                "color": "#e1e0d9"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+table v_real_user_checks
+	lineageTag: ace4a491-d9f8-4e31-9142-5a435cce180a
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 72575d6c-e4a9-4868-b2b7-3878cb6c7082
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: 989e35bb-e370-42a8-af5b-a5a17b8a80ef
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column check_name
+		dataType: string
+		lineageTag: 80090f79-ceb8-42c1-bfa2-3e5c8abb5bd9
+		summarizeBy: none
+		sourceColumn: check_name
+
+	column p75_display
+		dataType: string
+		lineageTag: 58a5bd46-a868-44cf-b7b3-5abb4d3a95d2
+		summarizeBy: none
+		sourceColumn: p75_display
+
+	column status
+		dataType: string
+		lineageTag: a133394d-b410-4f1b-9a44-1c4c37a6692d
+		summarizeBy: none
+		sourceColumn: status
+
+	column poor_visits_pct
+		dataType: double
+		formatString: 0.0
+		lineageTag: 6a9de204-05bd-46a3-83c4-63289b4f2c63
+		summarizeBy: none
+		sourceColumn: poor_visits_pct
+
+	partition v_real_user_checks = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_real_user_checks"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "check_name", "p75_display", "status", "poor_visits_pct"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"check_name", type text}, {"p75_display", type text}, {"status", type text}, {"poor_visits_pct", type number}})
+				in
+				    Typed
+

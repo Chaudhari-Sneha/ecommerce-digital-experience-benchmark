@@ -1,0 +1,58 @@
+table v_top_findings
+	lineageTag: c08857ad-fa09-41a4-83b6-2f8c41e0cdba
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 06f4c0bc-313f-48f5-904d-f7b6654ba32e
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: 74643714-2ef6-48af-9ba3-d10adcfd8d3f
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column finding_rank
+		dataType: int64
+		formatString: 0
+		lineageTag: d3c5a5cb-bcff-436a-bbce-2dc9d62234b8
+		summarizeBy: none
+		sourceColumn: finding_rank
+
+	column finding
+		dataType: string
+		lineageTag: 9b0b86fd-349b-41cb-8d2c-7d2df3d12141
+		summarizeBy: none
+		sourceColumn: finding
+
+	column detail
+		dataType: string
+		lineageTag: 82e4c8c6-db60-4fc0-b700-95f456b4b93b
+		summarizeBy: none
+		sourceColumn: detail
+
+	column lighthouse_est_saving
+		dataType: string
+		lineageTag: 33409055-470b-411a-9235-f820497c93c4
+		summarizeBy: none
+		sourceColumn: lighthouse_est_saving
+
+	column seen_in
+		dataType: string
+		lineageTag: 5c670d1b-f034-46a7-8c87-1532ad91219e
+		summarizeBy: none
+		sourceColumn: seen_in
+
+	partition v_top_findings = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_top_findings"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "finding_rank", "finding", "detail", "lighthouse_est_saving", "seen_in"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"finding_rank", Int64.Type}, {"finding", type text}, {"detail", type text}, {"lighthouse_est_saving", type text}, {"seen_in", type text}})
+				in
+				    Typed
+

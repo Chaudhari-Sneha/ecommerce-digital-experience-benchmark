@@ -1,0 +1,10 @@
+expression PgServer = "localhost:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 006426e7-e4e8-4d6f-9d89-bdad3b435144
+
+	annotation PBI_ResultType = Text
+
+expression PgDatabase = "digital_friction" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: d2ef8bbc-844c-47d0-9f51-285210b499f3
+
+	annotation PBI_ResultType = Text
+

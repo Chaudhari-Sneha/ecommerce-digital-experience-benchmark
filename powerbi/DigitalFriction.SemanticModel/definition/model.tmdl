@@ -1,0 +1,33 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["_Measures","companies","v_latest_friction_score","v_competitor_benchmark","v_friction_trend","anomalies","v_recent_runs","v_last_run_status","v_management_priority","v_component_status","v_component_gap","v_anomaly_readiness","v_real_user_checks","v_top_findings","v_device_gap","v_load_time_split","PgServer","PgDatabase"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table _Measures
+ref table companies
+ref table v_latest_friction_score
+ref table v_competitor_benchmark
+ref table v_friction_trend
+ref table anomalies
+ref table v_recent_runs
+ref table v_last_run_status
+ref table v_management_priority
+ref table v_component_status
+ref table v_component_gap
+ref table v_anomaly_readiness
+ref table v_real_user_checks
+ref table v_top_findings
+ref table v_device_gap
+ref table v_load_time_split
+
+ref cultureInfo en-US
+

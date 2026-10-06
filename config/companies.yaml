@@ -1,0 +1,50 @@
+companies:
+  - name: Flipkart
+    domain: flipkart.com
+    homepage_url: https://www.flipkart.com/
+    category: marketplace
+
+  - name: Myntra
+    domain: myntra.com
+    homepage_url: https://www.myntra.com/
+    category: fashion
+
+  - name: FirstCry
+    domain: firstcry.com
+    homepage_url: https://www.firstcry.com/
+    category: kids
+
+  - name: Nykaa
+    domain: nykaa.com
+    homepage_url: https://www.nykaa.com/
+    category: beauty
+
+  - name: Meesho
+    domain: meesho.com
+    homepage_url: https://www.meesho.com/
+    category: marketplace
+
+  - name: Purplle
+    domain: purplle.com
+    homepage_url: https://www.purplle.com/
+    category: beauty
+
+  - name: Tata CLiQ
+    domain: tatacliq.com
+    homepage_url: https://www.tatacliq.com/
+    category: marketplace
+
+  - name: Amazon India
+    domain: amazon.in
+    homepage_url: https://www.amazon.in/
+    category: marketplace
+
+  - name: Reliance Digital
+    domain: reliancedigital.in
+    homepage_url: https://www.reliancedigital.in/
+    category: electronics
+
+  - name: Croma
+    domain: croma.com
+    homepage_url: https://www.croma.com/
+    category: electronics

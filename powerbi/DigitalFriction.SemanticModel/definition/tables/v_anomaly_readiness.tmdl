@@ -1,0 +1,34 @@
+table v_anomaly_readiness
+	lineageTag: 92910159-01d3-41f9-a89c-99770db0a4e8
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d9546dad-d77a-470c-a9b9-33699d5e47c9
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column baseline_days
+		dataType: int64
+		formatString: 0
+		lineageTag: 42732d42-2da4-423d-b42b-6f68cf6842b7
+		summarizeBy: none
+		sourceColumn: baseline_days
+
+	column monitored
+		dataType: boolean
+		lineageTag: dfecc1cb-a3ff-4c95-8b6a-d7f44c028c80
+		summarizeBy: none
+		sourceColumn: monitored
+
+	partition v_anomaly_readiness = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_anomaly_readiness"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "baseline_days", "monitored"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"baseline_days", Int64.Type}, {"monitored", type logical}})
+				in
+				    Typed
+

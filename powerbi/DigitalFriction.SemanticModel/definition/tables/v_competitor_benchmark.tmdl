@@ -1,0 +1,78 @@
+table v_competitor_benchmark
+	lineageTag: 31e63710-9825-40f9-94ed-d67b6b4678de
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 71724e4d-fa1a-4ea9-89e3-78cefad9fd9e
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column score_date
+		dataType: dateTime
+		formatString: dd mmm yyyy
+		lineageTag: 587a487d-5ca0-42a0-8221-e3e2f08d4083
+		summarizeBy: none
+		sourceColumn: score_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column friction_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 0526fce1-d651-48e6-859f-1ffb64d8b4a0
+		summarizeBy: none
+		sourceColumn: friction_score
+
+	column perf_contribution
+		dataType: double
+		formatString: 0.0
+		lineageTag: f02b0c54-c511-4567-babc-6988ffb703a0
+		summarizeBy: none
+		sourceColumn: perf_contribution
+
+	column cwv_contribution
+		dataType: double
+		formatString: 0.0
+		lineageTag: 556a1268-cc15-426c-bf61-5aece4ef21a5
+		summarizeBy: none
+		sourceColumn: cwv_contribution
+
+	column quality_contribution
+		dataType: double
+		formatString: 0.0
+		lineageTag: a9ffff93-4516-43de-9496-d3aed109411f
+		summarizeBy: none
+		sourceColumn: quality_contribution
+
+	column reliability_contribution
+		dataType: double
+		formatString: 0.0
+		lineageTag: 82a4aac1-b4ad-491f-8c7b-b34426029249
+		summarizeBy: none
+		sourceColumn: reliability_contribution
+
+	column errors_contribution
+		dataType: double
+		formatString: 0.0
+		lineageTag: d1167c3c-a5ee-4e7d-ab3d-eff192e1ea36
+		summarizeBy: none
+		sourceColumn: errors_contribution
+
+	column is_score_reliable
+		dataType: boolean
+		lineageTag: 7da5d3d2-68ef-40a3-8501-a01d4f2891ad
+		summarizeBy: none
+		sourceColumn: is_score_reliable
+
+	partition v_competitor_benchmark = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_competitor_benchmark"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "score_date", "friction_score", "perf_contribution", "cwv_contribution", "quality_contribution", "reliability_contribution", "errors_contribution", "is_score_reliable"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"score_date", type date}, {"friction_score", type number}, {"perf_contribution", type number}, {"cwv_contribution", type number}, {"quality_contribution", type number}, {"reliability_contribution", type number}, {"errors_contribution", type number}, {"is_score_reliable", type logical}})
+				in
+				    Typed
+

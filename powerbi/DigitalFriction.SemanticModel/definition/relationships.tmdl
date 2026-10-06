@@ -1,0 +1,52 @@
+relationship rel_v_latest_friction_score_company
+	fromColumn: v_latest_friction_score.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_competitor_benchmark_company
+	fromColumn: v_competitor_benchmark.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_friction_trend_company
+	fromColumn: v_friction_trend.company_id
+	toColumn: companies.company_id
+
+relationship rel_anomalies_company
+	fromColumn: anomalies.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_last_run_status_company
+	fromColumn: v_last_run_status.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_management_priority_company
+	fromColumn: v_management_priority.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_component_status_company
+	fromColumn: v_component_status.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_component_gap_company
+	fromColumn: v_component_gap.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_anomaly_readiness_company
+	fromColumn: v_anomaly_readiness.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_real_user_checks_company
+	fromColumn: v_real_user_checks.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_top_findings_company
+	fromColumn: v_top_findings.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_device_gap_company
+	fromColumn: v_device_gap.company_id
+	toColumn: companies.company_id
+
+relationship rel_v_load_time_split_company
+	fromColumn: v_load_time_split.company_id
+	toColumn: companies.company_id
+

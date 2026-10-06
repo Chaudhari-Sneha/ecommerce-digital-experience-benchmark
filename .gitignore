@@ -1,0 +1,23 @@
+# Secrets: database password and API key live here
+.env
+.env.*
+!.env.example
+
+# Pipeline output (regenerated on every run)
+logs/
+data/raw/*
+!data/raw/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local tool and OS settings
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

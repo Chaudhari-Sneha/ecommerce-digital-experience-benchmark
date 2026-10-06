@@ -1,0 +1,46 @@
+table v_component_status
+	lineageTag: 11b19552-0a38-4f7e-b49a-d9ecded94cf5
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 6bd58fc2-1ff4-4a0b-9ebc-f1d8a224c969
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: b93c2d30-23e4-491c-9f71-d022ca38e286
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column component
+		dataType: string
+		lineageTag: dc20a488-5a08-487d-9808-de3576ae768f
+		summarizeBy: none
+		sourceColumn: component
+
+	column change_vs_baseline
+		dataType: double
+		formatString: 0.0
+		lineageTag: da2c4c3b-298d-4072-bcd7-67cd82a8e617
+		summarizeBy: none
+		sourceColumn: change_vs_baseline
+
+	column pattern
+		dataType: string
+		lineageTag: 431c061c-aea2-4cdc-aa39-9651710e5001
+		summarizeBy: none
+		sourceColumn: pattern
+
+	partition v_component_status = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_component_status"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "component", "change_vs_baseline", "pattern"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"component", type text}, {"change_vs_baseline", type number}, {"pattern", type text}})
+				in
+				    Typed
+

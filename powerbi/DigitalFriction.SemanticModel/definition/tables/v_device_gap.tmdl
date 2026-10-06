@@ -1,0 +1,48 @@
+table v_device_gap
+	lineageTag: 5c196d26-3aaa-4c86-bdaf-0faff74b2e1c
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 80adfe79-5dfe-4337-9ca9-c3f6d78ec2a4
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: de507afa-14c8-44db-90d9-1a171ca05d59
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column mobile_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 99e6b534-92ce-4570-97c9-4501f410f688
+		summarizeBy: none
+		sourceColumn: mobile_score
+
+	column desktop_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 2986c3fb-5b5d-4f26-9cd7-b0508f9ef905
+		summarizeBy: none
+		sourceColumn: desktop_score
+
+	column mobile_gap
+		dataType: double
+		formatString: 0.0
+		lineageTag: f98bfcd9-01a0-44bb-8a15-a9c9ecc2ba82
+		summarizeBy: none
+		sourceColumn: mobile_gap
+
+	partition v_device_gap = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_device_gap"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "mobile_score", "desktop_score", "mobile_gap"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"mobile_score", type number}, {"desktop_score", type number}, {"mobile_gap", type number}})
+				in
+				    Typed
+

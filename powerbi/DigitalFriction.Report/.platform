@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "DigitalFriction"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "1e4403cd-0734-52d3-b151-f490dbce83d4"
+  }
+}

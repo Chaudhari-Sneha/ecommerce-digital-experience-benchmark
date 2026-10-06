@@ -1,0 +1,70 @@
+table v_recent_runs
+	lineageTag: c7a3628c-805b-4963-b19e-91497824762a
+
+	column run_id
+		dataType: int64
+		formatString: 0
+		lineageTag: ea5b8c2f-33d1-44d3-b523-a43159929eca
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column run_started_at
+		dataType: dateTime
+		formatString: dd mmm yyyy hh:mm
+		lineageTag: 5ce19260-0445-436d-86ce-b0111ac9b479
+		summarizeBy: none
+		sourceColumn: run_started_at
+
+	column run_finished_at
+		dataType: dateTime
+		formatString: dd mmm yyyy hh:mm
+		lineageTag: 0846186d-9e40-4b6d-998d-5dd0cc29a044
+		summarizeBy: none
+		sourceColumn: run_finished_at
+
+	column status
+		dataType: string
+		lineageTag: ea0b25e6-7400-451f-a960-a658475033a7
+		summarizeBy: none
+		sourceColumn: status
+
+	column companies_attempted
+		dataType: int64
+		formatString: 0
+		lineageTag: c5b6a767-3ce1-40a9-8adb-d140b693e41e
+		summarizeBy: none
+		sourceColumn: companies_attempted
+
+	column companies_succeeded
+		dataType: int64
+		formatString: 0
+		lineageTag: 3ed8f1f2-09fe-44c7-ae4e-29f0ed19ebff
+		summarizeBy: none
+		sourceColumn: companies_succeeded
+
+	column companies_failed
+		dataType: int64
+		formatString: 0
+		lineageTag: 252ee8ce-d104-4608-a078-ea1addd489c2
+		summarizeBy: none
+		sourceColumn: companies_failed
+
+	column duration_seconds
+		dataType: double
+		formatString: #,0
+		lineageTag: 19e2f896-d6b6-4516-a94a-58e45c294305
+		summarizeBy: none
+		sourceColumn: duration_seconds
+
+	partition v_recent_runs = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_recent_runs"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"run_id", "run_started_at", "run_finished_at", "status", "companies_attempted", "companies_succeeded", "companies_failed", "duration_seconds"}),
+				    LocalTime = Table.TransformColumns(Selected, {{"run_started_at", each if _ is datetimezone then DateTimeZone.RemoveZone(DateTimeZone.ToLocal(_)) else _, type datetime}, {"run_finished_at", each if _ is datetimezone then DateTimeZone.RemoveZone(DateTimeZone.ToLocal(_)) else _, type datetime}}),
+				    Typed = Table.TransformColumnTypes(LocalTime, {{"run_id", Int64.Type}, {"run_started_at", type datetime}, {"run_finished_at", type datetime}, {"status", type text}, {"companies_attempted", Int64.Type}, {"companies_succeeded", Int64.Type}, {"companies_failed", Int64.Type}, {"duration_seconds", type number}})
+				in
+				    Typed
+

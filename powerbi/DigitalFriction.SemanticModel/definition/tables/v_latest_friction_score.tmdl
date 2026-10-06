@@ -1,0 +1,34 @@
+table v_latest_friction_score
+	lineageTag: 96f785ce-a612-49c8-8f09-ebfac4de17a8
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 4ab6ea54-ab50-463b-8331-db8c0f02c554
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column friction_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 5421c0f0-d20e-4db6-8e83-d4a949524fd6
+		summarizeBy: none
+		sourceColumn: friction_score
+
+	column is_score_reliable
+		dataType: boolean
+		lineageTag: 7ce508fc-908e-46cc-b79a-41f5aa07f7cc
+		summarizeBy: none
+		sourceColumn: is_score_reliable
+
+	partition v_latest_friction_score = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_latest_friction_score"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "friction_score", "is_score_reliable"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"friction_score", type number}, {"is_score_reliable", type logical}})
+				in
+				    Typed
+

@@ -1,0 +1,40 @@
+table v_component_gap
+	lineageTag: 2e800a2f-6ddc-4cb5-8612-b34a264e0eee
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a45e99f1-9dea-4e50-9990-439e5e100370
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: 7412f219-3158-46e2-b639-22675d66e57e
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column component
+		dataType: string
+		lineageTag: a8c96917-7bb3-409d-86bb-982b96a1bbb8
+		summarizeBy: none
+		sourceColumn: component
+
+	column points_above_industry
+		dataType: double
+		formatString: 0.0
+		lineageTag: e9d4fe81-fc7f-4f9c-9044-64bd46734fc2
+		summarizeBy: none
+		sourceColumn: points_above_industry
+
+	partition v_component_gap = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_component_gap"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "component", "points_above_industry"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"component", type text}, {"points_above_industry", type number}})
+				in
+				    Typed
+

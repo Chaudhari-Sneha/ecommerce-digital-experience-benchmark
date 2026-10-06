@@ -1,0 +1,179 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "overview",
+  "displayName": "Executive Dashboard",
+  "displayOption": "FitToPage",
+  "height": 1900,
+  "width": 1400,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f_active_overview",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "companies"
+              }
+            },
+            "Property": "is_active"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "t",
+              "Entity": "companies",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "t"
+                          }
+                        },
+                        "Property": "is_active"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "true"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  },
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "85D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#f3f2ef'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "company_slicer",
+      "target": "c9e4467e848f1bb0aef5",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "composition",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "device_gap",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "fae4046cd78bdcc3fc4a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "kpi_above",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "kpi_avg",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "kpi_coverage",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "kpi_priority",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "opportunity",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "priority_matrix",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "real_user_matrix",
+      "type": "NoFilter"
+    },
+    {
+      "source": "company_slicer",
+      "target": "load_split",
+      "type": "NoFilter"
+    }
+  ]
+}

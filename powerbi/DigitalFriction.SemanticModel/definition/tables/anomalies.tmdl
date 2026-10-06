@@ -1,0 +1,61 @@
+table anomalies
+	lineageTag: af9d3986-84d1-4c38-9859-1891d423981d
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 5757e2c0-64f8-4854-bc12-190cff218d3e
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column metric_name
+		dataType: string
+		lineageTag: 175a03d9-b93b-4835-b21d-d1e53caacbb5
+		summarizeBy: none
+		sourceColumn: metric_name
+
+	column detected_date
+		dataType: dateTime
+		formatString: dd mmm yyyy
+		lineageTag: 2583cc04-5574-403b-8d61-68ab3985e7b9
+		summarizeBy: none
+		sourceColumn: detected_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column z_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: dbd822b8-5ec4-451a-b2ce-2e301ce482fb
+		summarizeBy: none
+		sourceColumn: z_score
+
+	column anomaly_type
+		dataType: string
+		lineageTag: 00d255bd-944f-4dae-89d3-2d187f523504
+		summarizeBy: none
+		sourceColumn: anomaly_type
+
+	column severity
+		dataType: string
+		lineageTag: 2e9e2885-b700-496a-b2fc-6f4dbdbf03c9
+		summarizeBy: none
+		sourceColumn: severity
+
+	column status
+		dataType: string
+		lineageTag: e5622b29-948c-4ed1-a1f9-07d15a1932fa
+		summarizeBy: none
+		sourceColumn: status
+
+	partition anomalies = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="anomalies"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "metric_name", "detected_date", "z_score", "anomaly_type", "severity", "status"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"metric_name", type text}, {"detected_date", type date}, {"z_score", type number}, {"anomaly_type", type text}, {"severity", type text}, {"status", type text}})
+				in
+				    Typed
+

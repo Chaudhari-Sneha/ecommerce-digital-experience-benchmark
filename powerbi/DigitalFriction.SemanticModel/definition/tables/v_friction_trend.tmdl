@@ -1,0 +1,50 @@
+table v_friction_trend
+	lineageTag: 8a5dacc0-95f0-44df-9b95-cf0cda668cee
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 7256b894-e1a0-4039-9ee8-41d2c300b4ab
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column score_date
+		dataType: dateTime
+		formatString: dd mmm yyyy
+		lineageTag: fb84dc2b-19dc-4f90-90ed-de0aed0e69e2
+		summarizeBy: none
+		sourceColumn: score_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column friction_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 30eb3417-41ca-4a14-902b-da251d2d3a17
+		summarizeBy: none
+		sourceColumn: friction_score
+
+	column data_completeness_pct
+		dataType: double
+		formatString: 0.0
+		lineageTag: f7bc5b11-0300-4895-8051-251e201fa71e
+		summarizeBy: none
+		sourceColumn: data_completeness_pct
+
+	column is_score_reliable
+		dataType: boolean
+		lineageTag: 2e9db305-e13a-4239-befb-47d8e07b91b0
+		summarizeBy: none
+		sourceColumn: is_score_reliable
+
+	partition v_friction_trend = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_friction_trend"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "score_date", "friction_score", "data_completeness_pct", "is_score_reliable"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"score_date", type date}, {"friction_score", type number}, {"data_completeness_pct", type number}, {"is_score_reliable", type logical}})
+				in
+				    Typed
+

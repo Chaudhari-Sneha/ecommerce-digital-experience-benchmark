@@ -1,0 +1,85 @@
+table v_management_priority
+	lineageTag: 2562fc2a-466d-426c-93d2-767eb6058df0
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 04ae057d-59d2-4923-ad0f-dc8a6620792b
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: b0dee362-c71a-45d6-8791-65ff148ff24d
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column latest_date
+		dataType: dateTime
+		formatString: dd mmm yyyy
+		lineageTag: 065b9c0a-7928-46ab-bbb3-17fad1aa666b
+		summarizeBy: none
+		sourceColumn: latest_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column friction_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 036d1383-ff58-4794-a889-b67698e2e10a
+		summarizeBy: none
+		sourceColumn: friction_score
+
+	column gap_vs_industry
+		dataType: double
+		formatString: 0.0
+		lineageTag: e99a35e5-b8c8-478a-98b5-00ae7eed0e59
+		summarizeBy: none
+		sourceColumn: gap_vs_industry
+
+	column change_vs_baseline
+		dataType: double
+		formatString: 0.0
+		lineageTag: 9bf184f7-c596-446d-b224-29dbb3362550
+		summarizeBy: none
+		sourceColumn: change_vs_baseline
+
+	column data_completeness_pct
+		dataType: double
+		formatString: 0.0
+		lineageTag: 7f15827b-afb2-4678-b5e7-220c05c859b7
+		summarizeBy: none
+		sourceColumn: data_completeness_pct
+
+	column driver_component
+		dataType: string
+		lineageTag: 50c5fe56-5cd6-44e5-8b98-9774774b7e0f
+		summarizeBy: none
+		sourceColumn: driver_component
+
+	column priority_score
+		dataType: double
+		formatString: 0.0
+		lineageTag: 10d6c36c-04e1-44b8-adcd-d93c0f9dfa76
+		summarizeBy: none
+		sourceColumn: priority_score
+
+	column priority_quadrant
+		dataType: string
+		lineageTag: 7c6fc0b6-ea68-486e-b2f1-ca5f061cc8c8
+		summarizeBy: none
+		sourceColumn: priority_quadrant
+
+	partition v_management_priority = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_management_priority"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "latest_date", "friction_score", "gap_vs_industry", "change_vs_baseline", "data_completeness_pct", "driver_component", "priority_score", "priority_quadrant"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"latest_date", type date}, {"friction_score", type number}, {"gap_vs_industry", type number}, {"change_vs_baseline", type number}, {"data_completeness_pct", type number}, {"driver_component", type text}, {"priority_score", type number}, {"priority_quadrant", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Exception
+

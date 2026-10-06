@@ -1,0 +1,48 @@
+table v_load_time_split
+	lineageTag: 115058c2-2036-493a-85ff-06d6076737fa
+
+	column company_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 0271f918-7955-400c-aa8c-32def4fab7e8
+		summarizeBy: none
+		sourceColumn: company_id
+
+	column company_name
+		dataType: string
+		lineageTag: dfb88c49-17e3-42eb-91d5-ebeb0fa53ae5
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column server_wait_s
+		dataType: double
+		formatString: 0.0
+		lineageTag: 43d4bdf3-ff44-4f23-8d74-67f2889c27f1
+		summarizeBy: none
+		sourceColumn: server_wait_s
+
+	column page_build_s
+		dataType: double
+		formatString: 0.0
+		lineageTag: 0ea8f9a2-8fbf-44d0-b42c-f02ea9272f5f
+		summarizeBy: none
+		sourceColumn: page_build_s
+
+	column load_time_s
+		dataType: double
+		formatString: 0.0
+		lineageTag: 10623c36-d2ff-4be9-8996-5716bd4a37d8
+		summarizeBy: none
+		sourceColumn: load_time_s
+
+	partition v_load_time_split = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(PgServer, PgDatabase),
+				    Data = Source{[Schema="public", Item="v_load_time_split"]}[Data],
+				    Selected = Table.SelectColumns(Data, {"company_id", "company_name", "server_wait_s", "page_build_s", "load_time_s"}),
+				    Typed = Table.TransformColumnTypes(Selected, {{"company_id", Int64.Type}, {"company_name", type text}, {"server_wait_s", type number}, {"page_build_s", type number}, {"load_time_s", type number}})
+				in
+				    Typed
+
